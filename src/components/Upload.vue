@@ -1,5 +1,5 @@
 <template>
-    <form id="app" @submit.prevent="handleSubmit">
+    <form id="app" @submit.prevent="handleSubmit()">
         <div class="container">
             <div class="panel panel-sm">
                 <div class="panel-heading"> 
@@ -9,39 +9,46 @@
                 <div class="form-group">
                 <label for="csv_file" class="control-label col-sm-3 text-right">CSV file to import</label>
                 <div class="col-sm-9">
-                    <input type="file" id="csv_file" name="csv_file" class="form-control" @change="loadCSV($event)">
+                    <input type="file" id="csv_file" name="csv_file" class="form-control" ref="file" @change="loadCSV($event)">
                 </div>
                 </div>
                 <div class="col-sm-offset-3 col-sm-9">
                 <div class="checkbox-inline">
-                    <label for="header_rows"><input type="checkbox" id="header_rows"> File contains header row?</label>
+                    <label for="header_rows">
+                    <input type="checkbox" id="header_rows"> File contains header row?</label>
                 </div>
                 </div>
                 <div class="col-sm-offset-3 col-sm-9" id="buttons">
-                    <button class="btn btn-primary" id="parsing-button">Parse CSV</button>
+                    <!-- <button class="btn btn-primary" id="parsing-button">Parse CSV</button> -->
+                    <button type="submit" class="btn btn-primary" id="parsing-button">Submit</button>
                 </div>
                 <table v-if="parse_csv">
-                <thead>
-                    <tr>
-                    <th v-for="key in parse_header"
-                        @click="sortBy(key)"
-                        :class="{ active: sortKey == key }">
-                        {{ key | capitalize }}
-                        <span class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
-                        </span>
-                    </th>
-                    </tr>
-                </thead>
-                    <tr v-for="csv in parse_csv">
+                    <thead>
+                        <tr>
+                        <th colspan="{{parse_header.length}}" class="table-title">Imported Data</th>
+                        </tr>
+                        <tr>
+                        <th v-for="key in parse_header"
+                            @click="sortBy(key)"
+                            :class="{ active: sortKey == key }">
+                            {{ key | capitalize }}
+                            <span class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
+                            </span>
+                        </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="csv in parse_csv">
                         <td v-for="key in parse_header">
-                        {{csv[key]}}
+                            {{csv[key]}}
                         </td>
-                    </tr>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary" id="parsing-button">Submit</button>
+        <!-- <button type="submit" class="btn btn-primary" id="parsing-button">Submit</button> -->
     </form>
 </template>
 
@@ -56,7 +63,11 @@ export default {
       parse_header: [],
       parse_csv: [],
       sortOrders:{},
-      sortKey: ''
+      sortKey: '',
+      'api': 'http://localhost://3000/api',
+      files: [],
+      upload_status: '',
+      filename: ''
     };
   },
   filters: {
@@ -99,6 +110,7 @@ export default {
     },
     loadCSV(e) {
       let vm = this
+      this.filename = this.$refs.file.files[0]
       if (window.FileReader) {
         let reader = new FileReader();
         reader.readAsText(e.target.files[0]);
@@ -109,12 +121,21 @@ export default {
         };
         reader.onerror = function(evt) {
           if(evt.target.error.name == "NotReadableError") {
-            alert("Canno't read file !");
+            alert("Cannot read file!");
           }
         };
       } else {
         alert('FileReader are not supported in this browser.');
       }
+    },
+    // uploadedFile(){
+    //     this.filename = this.$refs.file.files[0]
+    // },
+    handleSubmit(){
+        console.log("Submitted")
+        let formData = new FormData()
+        formData.append("csv", this.filename)
+
     }
   }
 }
