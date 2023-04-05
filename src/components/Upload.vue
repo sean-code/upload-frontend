@@ -139,6 +139,17 @@ export default {
         let formData = new FormData()
         formData.append("csv", this.filename)
 
+        axiosConfig = {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }
+
+        axios.post(api + '/files/', formData, axiosConfig )
+            .then( response => {
+              console.log(response)
+            })
+
     }
   }
 }
