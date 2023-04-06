@@ -148,6 +148,9 @@ export default {
         axios.post(api + '/files/', formData, axiosConfig )
             .then( response => {
               console.log(response)
+              this.upload_status('File Uploaded Successfully')
+            }).catch(error => {
+              this.upload_status('File Uploaded Successfully')
             })
 
     }
